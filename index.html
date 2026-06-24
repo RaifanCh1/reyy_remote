@@ -184,6 +184,8 @@
             <button class="trigger-btn btn-main" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/REGEDIT', 'ON/OFF PANEL')">On/Off Panel</button>
             <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/SCREENSHOT', 'SCREENSHOT')">Screenshot</button>
             <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/WHATSAPP', 'WHATSAPP')">Whatsapp</button>
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/FREEFIREMAX', 'FREE FIRE MAX')">Free Fire Max</button>
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/GG_MOUSE_PRO', 'GG MOUSE PRO')">GG Mouse Pro</button>
         </div>
 
         <!-- TAB 2: RESOLUTION CHANGER -->
@@ -218,7 +220,7 @@
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal-box">
             <h3>Konfirmasi Resolusi</h3>
-            <p>Tekan gunakan jika yakin. Jika salah input atau tidak direspon 10 detik, sistem otomatis membatalkan eksekusi.</p>
+            <p>Tekan gunakan jika yakin. Jika salah input atau tidak direspon 10秒, sistem otomatis membatalkan eksekusi.</p>
             <div id="timerDisplay" class="timer-display">10</div>
             <div class="modal-buttons">
                 <button class="modal-btn btn-confirm" onclick="konfirmasiReso()">Gunakan RESO</button>
@@ -252,12 +254,10 @@
                 return;
             }
 
-            // Tampilkan UI pop-up (HP target tidak langsung berubah)
             document.getElementById("modalOverlay").style.display = "flex";
             timeLeft = 10;
             document.getElementById("timerDisplay").innerText = timeLeft;
 
-            // Jalankan Hitung Mundur 10 Detik
             clearInterval(countdown);
             countdown = setInterval(() => {
                 timeLeft--;
@@ -265,7 +265,7 @@
                 
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
-                    batalReso(); // Jika waktu habis, otomatis tutup tanpa mengubah HP
+                    batalReso();
                 }
             }, 1000);
         }
@@ -278,7 +278,6 @@
             const h = document.getElementById('height').value;
             const d = document.getElementById('density').value;
 
-            // Tembak data ke HP hanya saat tombol konfirmasi ditekan
             const customUrl = `${baseUrl}/ubah_reso?width=${w}&height=${h}&density=${d}`;
             kirimTrigger(customUrl, `CUSTOM RESO (${w}x${h})`);
         }
@@ -287,7 +286,6 @@
             clearInterval(countdown);
             tutupFloatingWindow();
             
-            // Ditutup tanpa mengirim data eksekusi, HP aman di resolusi semula
             const statusDiv = document.getElementById("status");
             statusDiv.innerText = "Cancelled: Perubahan Dibatalkan!";
             statusDiv.style.color = "#ff3366";
@@ -295,7 +293,6 @@
         }
 
         function manualResetReso() {
-            // Tombol manual khusus untuk paksa reset ke bawaan device asli
             const resetUrl = `${baseUrl}/ubah_reso?width=reset&height=reset&density=reset`;
             kirimTrigger(resetUrl, "RESET TO DEFAULT DEVICE");
         }
