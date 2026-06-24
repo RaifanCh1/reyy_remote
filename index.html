@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KzTeam REGEDIT Panel</title>
+    <title>Reyy P4NEL - Remote Execution</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: #141421; /* Latar belakang gelap ungu dari gambar */
+            background: #0b0f12; 
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -21,173 +21,147 @@
             justify-content: flex-start;
             min-height: 100vh;
             padding: 2.5rem 1rem;
-            overflow: hidden; /* Mencegah scrollbar muncul karena efek salju */
+            overflow-y: auto;
+            overflow-x: hidden;
             position: relative;
         }
 
-        /* Canvas khusus efek salju */
         #snowCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Supaya area di belakang tetap bisa diklik */
-            z-index: 1;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
         }
 
-        /* Memastikan konten utama berada di atas salju */
-        header, .panel-container, #status {
-            position: relative;
-            z-index: 10;
+        header, .tabs-container, .panel-container, #status {
+            position: relative; z-index: 10; width: 100%; max-width: 450px;
         }
 
-        /* Header Panel */
         header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center; margin-bottom: 2rem;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Judul yang diperbarui sesuai gambar */
         h1 {
-            font-size: 2.4rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap;
+            font-size: 2.4rem; font-weight: 800; letter-spacing: 2px;
+            margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;
         }
 
         h1 .kz {
-            color: #bd00ff; /* Ungu terang untuk 'KzTeam' */
-            text-transform: none; /* Huruf normal */
+            color: #00ff66; text-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
         }
 
-        h1 .regedit {
-            color: #ffffff; /* Putih terang untuk 'REGEDIT' */
-            text-transform: uppercase; /* Huruf besar semua */
-            font-weight: 900; /* Lebih tebal */
+        h1 .regedit { color: #ffffff; text-transform: uppercase; font-weight: 900; }
+        .subtitle { font-size: 0.9rem; color: #00aa44; font-style: italic; }
+
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+
+        .tab-btn {
+            flex: 1; padding: 12px; background: #12181d;
+            border: 2px solid rgba(0, 255, 102, 0.1); border-radius: 10px;
+            color: #888888; font-weight: 700; font-size: 0.85rem;
+            cursor: pointer; text-transform: uppercase; transition: all 0.2s ease;
         }
 
-        .subtitle {
-            font-size: 0.9rem;
-            color: #8c00c7; /* Ungu subtitle */
-            text-transform: lowercase; /* Huruf kecil semua */
-            letter-spacing: 1px;
-            font-style: italic;
+        .tab-btn.active {
+            color: #ffffff; background: #162a22; border-color: #00ff66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
         }
 
-        /* Container Tombol List */
-        .panel-container {
-            width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
+        .tab-content { display: none; flex-direction: column; gap: 14px; width: 100%; }
+        .tab-content.active { display: flex; }
 
-        /* Desain Tombol Kotak Panjang Ungu */
         .trigger-btn {
-            width: 100%;
-            padding: 20px 24px;
-            background: #201a30; /* Latar tombol gelap ungu */
-            border: 2px solid rgba(189, 0, 255, 0.2); /* Border ungu tipis */
-            border-radius: 14px;
-            color: #ffffff;
-            font-size: 1.05rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            width: 100%; padding: 20px 24px; background: #12181d;
+            border: 2px solid rgba(0, 255, 102, 0.15); border-radius: 14px;
+            color: #ffffff; font-size: 1.05rem; font-weight: 700;
+            text-transform: uppercase; text-align: left; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
         }
 
-        /* Efek lampu garis di sisi kiri tombol (Ungu) */
         .trigger-btn::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 5px;
-            background: #bd00ff; /* Ungu terang garis */
-            box-shadow: 0 0 15px #bd00ff;
-            transition: all 0.2s ease;
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 5px;
+            background: #00ff66; box-shadow: 0 0 15px #00ff66;
         }
 
-        /* Icon panah di sebelah kanan tombol (Ungu) */
-        .trigger-btn::after {
-            content: '➔';
-            font-size: 1.2rem;
-            color: rgba(189, 0, 255, 0.5);
-            transition: all 0.2s ease;
-        }
+        .trigger-btn::after { content: '➔'; font-size: 1.2rem; color: rgba(0, 255, 102, 0.4); }
 
-        /* Efek Hover / Sentuhan (Glow Ungu) */
         .trigger-btn:hover {
             transform: translateY(-2px) translateX(4px);
-            border-color: rgba(189, 0, 255, 0.7);
-            background: #25203a;
-            box-shadow: 0 6px 20px rgba(189, 0, 255, 0.2);
+            border-color: rgba(0, 255, 102, 0.6); background: #172227;
         }
 
-        .trigger-btn:hover::after {
-            color: #ffffff;
-            transform: translateX(5px);
+        .trigger-btn:active { transform: scale(0.97); background: #0e1317; }
+
+        .btn-main { background: #005221; border-color: rgba(0, 255, 102, 0.4); }
+        .btn-main::before { background: #5eff99; }
+
+        .form-container {
+            background: #12181d; border: 2px solid rgba(0, 255, 102, 0.15);
+            border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
         }
 
-        /* Efek Saat Ditekan */
-        .trigger-btn:active {
-            transform: scale(0.97) translateX(2px);
-            background: #1a1525;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        .form-group { margin-bottom: 0; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #00ff66; margin-bottom: 6px; text-transform: uppercase;}
+        .form-group input {
+            width: 100%; padding: 12px 16px; background: #1a232a;
+            border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 8px;
+            color: #ffffff; font-size: 1rem; outline: none;
         }
 
-        /* Warna Khusus Tombol Utama (Ungu Lebih Gelap dari Gambar) */
-        .btn-main {
-            background: #460091; /* Ungu tua tombol 'Login' */
-            border-color: rgba(189, 0, 255, 0.4);
-        }
-        .btn-main::before {
-            background: #d459ff; /* Ungu sangat terang garis */
-            box-shadow: 0 0 15px #d459ff;
-        }
-        .btn-main:hover {
-            background: #5500b0;
-            border-color: rgba(189, 0, 255, 1);
+        .btn-submit {
+            width: 100%; padding: 14px; background: #00ff66; border: none; border-radius: 8px;
+            color: #0b0f12; font-size: 1rem; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 255, 102, 0.3);
         }
 
-        /* Bar Status di Bagian Bawah (Serba Ungu) */
+        .btn-reset-device {
+            width: 100%; padding: 12px; background: #2a1b24; border: 1px solid rgba(255, 51, 102, 0.3); border-radius: 8px;
+            color: #ff3366; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; transition: all 0.2s ease;
+        }
+        .btn-reset-device:hover { background: #3d1f2f; border-color: #ff3366; }
+
+        .section-title { font-size: 0.9rem; font-weight: 800; text-transform: uppercase; color: #00aa44; margin: 10px 0 5px 2px; }
+
         #status {
-            width: 100%;
-            max-width: 450px;
-            margin-top: 2.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            text-align: center;
-            letter-spacing: 1.5px;
-            color: #8c00c7; /* Ungu status default */
-            transition: all 0.3s ease;
-            padding: 14px;
-            border-radius: 12px;
-            background: rgba(189, 0, 255, 0.05);
-            border: 1px solid rgba(189, 0, 255, 0.1);
+            margin-top: 2.5rem; margin-bottom: 2rem; font-size: 0.9rem; font-weight: 600;
+            text-align: center; padding: 14px; border-radius: 12px;
+            background: rgba(0, 255, 102, 0.03); border: 1px solid rgba(0, 255, 102, 0.08); color: #00aa44;
         }
+
+        /* UI FLOATING WINDOW (MODAL POP-UP) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); display: none; align-items: center;
+            justify-content: center; z-index: 100;
+        }
+
+        .modal-box {
+            background: #12181d; border: 2px solid #00ff66; border-radius: 16px;
+            padding: 25px; width: 90%; max-width: 380px; text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
+        }
+
+        .modal-box h3 { font-size: 1.3rem; color: #ffffff; margin-bottom: 10px; text-transform: uppercase;}
+        .modal-box p { font-size: 0.95rem; color: #aaaaaa; margin-bottom: 20px; }
+        
+        .timer-display {
+            font-size: 2.5rem; font-weight: 900; color: #ff3366;
+            margin-bottom: 20px; text-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+        }
+
+        .modal-buttons { display: flex; gap: 12px; }
+        
+        .modal-btn {
+            flex: 1; padding: 12px; border: none; border-radius: 8px;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
+        }
+        
+        .btn-confirm { background: #00ff66; color: #0b0f12; }
+        .btn-cancel { background: #2a1b24; color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.3); }
     </style>
 </head>
 <body>
@@ -195,109 +169,181 @@
     <canvas id="snowCanvas"></canvas>
 
     <header>
-        <h1><span class="kz">KzTeam</span><span class="regedit">REGEDIT</span></h1>
+        <h1><span class="kz">Reyy</span><span class="regedit">P4NEL</span></h1>
         <div class="subtitle">remote execution panel</div>
     </header>
 
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('ft-tools')">FT Tools</button>
+        <button class="tab-btn" onclick="switchTab('reso-changer')">Resolution Changer</button>
+    </div>
+
     <div class="panel-container">
-        <button class="trigger-btn btn-main" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/apalah', 'LAUNCH APALAH')">Launch Apalah</button>
-        <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/1800x2880', 'RESO MIPAD 6')">Reso Mipad 6</button>
-        <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/1080x1920', 'RESO LANDSCAPE')">Reso Landscape</button>
-        <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/1080x2880', 'RESO ULTRAWIDE')">Reso Ultrawide</button>
+        <!-- TAB 1: FT TOOLS -->
+        <div id="ft-tools" class="tab-content active">
+            <button class="trigger-btn btn-main" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/REGEDIT', 'ON/OFF PANEL')">On/Off Panel</button>
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/SCREENSHOT', 'SCREENSHOT')">Screenshot</button>
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/WHATSAPP', 'WHATSAPP')">Whatsapp</button>
+        </div>
+
+        <!-- TAB 2: RESOLUTION CHANGER -->
+        <div id="reso-changer" class="tab-content">
+            <div class="form-container">
+                <div class="form-group">
+                    <label>Horizontal (Lebar)</label>
+                    <input type="number" id="width" placeholder="Contoh: 1080">
+                </div>
+                <div class="form-group">
+                    <label>Vertical (Tinggi)</label>
+                    <input type="number" id="height" placeholder="Contoh: 2400">
+                </div>
+                <div class="form-group">
+                    <label>Density (DPI)</label>
+                    <input type="number" id="density" placeholder="Contoh: 440">
+                </div>
+                <button class="btn-submit" onclick="bukaFloatingWindow()">Terapkan Resolusi</button>
+                <button class="btn-reset-device" onclick="manualResetReso()">Reset Ke Normal Device</button>
+            </div>
+
+            <div class="section-title">Preset Resolution</div>
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/RESOMIPAD6', 'RESO MIPAD 6')">Reso Mipad 6</button>
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/RESOLANDSCAPE', 'RESO LANDSCAPE')">Reso Landscape</button>
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/RESOULTRAWIDE', 'RESO ULTRAWIDE')">Reso Ultrawide</button>
+        </div>
     </div>
 
     <div id="status">System Ready</div>
 
+    <!-- FLOATING WINDOW / MODAL POP-UP -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Konfirmasi Resolusi</h3>
+            <p>Tekan gunakan jika yakin. Jika salah input atau tidak direspon 10 detik, sistem otomatis membatalkan eksekusi.</p>
+            <div id="timerDisplay" class="timer-display">10</div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-confirm" onclick="konfirmasiReso()">Gunakan RESO</button>
+                <button class="modal-btn btn-cancel" onclick="batalReso()">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- SCRIPT EFEK SALJU JATUH ---
-        const canvas = document.getElementById('snowCanvas');
-        const ctx = canvas.getContext('2d');
+        let countdown;
+        let timeLeft = 10;
+        const baseUrl = 'https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da';
 
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
-
-        const numFlakes = 60; // Jumlah butiran salju di layar
-        const flakes = [];
-
-        for (let i = 0; i < numFlakes; i++) {
-            flakes.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                r: Math.random() * 3 + 1, // Ukuran butiran acak
-                d: Math.random() * numFlakes, // Kepadatan goyangan angin
-                speed: Math.random() * 1 + 0.5 // Kecepatan jatuh
-            });
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        function drawSnow() {
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.65)'; // Warna salju putih transparan
-            ctx.beginPath();
-            for (let i = 0; i < numFlakes; i++) {
-                const f = flakes[i];
-                ctx.moveTo(f.x, f.y);
-                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+        // --- MANAJEMEN FLOATING WINDOW DI WEB ---
+        function bukaFloatingWindow() {
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            const d = document.getElementById('density').value;
+            const statusDiv = document.getElementById("status");
+
+            if (!w || !h || !d) {
+                statusDiv.innerText = "Error: Isi Semua Kolom!";
+                statusDiv.style.color = "#ff3366";
+                return;
             }
-            ctx.fill();
-            moveSnow();
-        }
 
-        function moveSnow() {
-            for (let i = 0; i < numFlakes; i++) {
-                const f = flakes[i];
-                f.y += f.speed;
-                f.x += Math.sin(f.d) * 0.4; // Efek goyangan ditiup angin lembut
+            // Tampilkan UI pop-up (HP target tidak langsung berubah)
+            document.getElementById("modalOverlay").style.display = "flex";
+            timeLeft = 10;
+            document.getElementById("timerDisplay").innerText = timeLeft;
 
-                // Kalau salju sampai bawah layar, reset balikin ke atas
-                if (f.y > height) {
-                    flakes[i] = { x: Math.random() * width, y: 0, r: f.r, d: f.d, speed: f.speed };
+            // Jalankan Hitung Mundur 10 Detik
+            clearInterval(countdown);
+            countdown = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timerDisplay").innerText = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    batalReso(); // Jika waktu habis, otomatis tutup tanpa mengubah HP
                 }
-            }
+            }, 1000);
         }
 
-        function updateAnimation() {
-            drawSnow();
-            requestAnimationFrame(updateAnimation);
-        }
-        updateAnimation();
+        function konfirmasiReso() {
+            clearInterval(countdown);
+            tutupFloatingWindow();
 
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            const d = document.getElementById('density').value;
+
+            // Tembak data ke HP hanya saat tombol konfirmasi ditekan
+            const customUrl = `${baseUrl}/ubah_reso?width=${w}&height=${h}&density=${d}`;
+            kirimTrigger(customUrl, `CUSTOM RESO (${w}x${h})`);
+        }
+
+        function batalReso() {
+            clearInterval(countdown);
+            tutupFloatingWindow();
+            
+            // Ditutup tanpa mengirim data eksekusi, HP aman di resolusi semula
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = "Cancelled: Perubahan Dibatalkan!";
+            statusDiv.style.color = "#ff3366";
+            setTimeout(() => { resetStatus(); }, 2500);
+        }
+
+        function manualResetReso() {
+            // Tombol manual khusus untuk paksa reset ke bawaan device asli
+            const resetUrl = `${baseUrl}/ubah_reso?width=reset&height=reset&density=reset`;
+            kirimTrigger(resetUrl, "RESET TO DEFAULT DEVICE");
+        }
+
+        function tutupFloatingWindow() {
+            document.getElementById("modalOverlay").style.display = "none";
+        }
 
         // --- SCRIPT TRIGGER MACRODROID ---
         function kirimTrigger(url, namaFitur) {
             const statusDiv = document.getElementById("status");
-            
             statusDiv.innerText = `Executing: ${namaFitur}...`;
-            statusDiv.style.color = "#bd00ff";
-            statusDiv.style.backgroundColor = "rgba(189, 0, 255, 0.15)";
-            statusDiv.style.borderColor = "rgba(189, 0, 255, 0.3)";
+            statusDiv.style.color = "#00ff66";
 
             fetch(url, { method: "GET", mode: "no-cors" })
                 .then(() => {
                     statusDiv.innerText = `Success: ${namaFitur} Injected!`;
-                    statusDiv.style.color = "#ffffff";
-                    statusDiv.style.backgroundColor = "#460091";
-                    statusDiv.style.borderColor = "#bd00ff";
-                    
-                    setTimeout(() => {
-                        statusDiv.innerText = "System Ready";
-                        statusDiv.style.color = "#8c00c7";
-                        statusDiv.style.backgroundColor = "rgba(189, 0, 255, 0.05)";
-                        statusDiv.style.borderColor = "rgba(189, 0, 255, 0.1)";
-                    }, 2500);
+                    setTimeout(() => { resetStatus(); }, 2500);
                 })
                 .catch(error => {
                     statusDiv.innerText = `Error: ${namaFitur} Failed`;
                     statusDiv.style.color = "#ff3366";
-                    statusDiv.style.backgroundColor = "rgba(255, 51, 102, 0.1)";
-                    statusDiv.style.borderColor = "rgba(255, 51, 102, 0.2)";
-                    console.error("Error:", error);
                 });
         }
+
+        function resetStatus() {
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = "System Ready";
+            statusDiv.style.color = "#00aa44";
+        }
+
+        // --- EFEK SALJU ---
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        let canvasW = canvas.width = window.innerWidth;
+        let canvasH = canvas.height = window.innerHeight;
+        const numFlakes = 60; const flakes = [];
+        for (let i = 0; i < numFlakes; i++) { flakes.push({ x: Math.random() * canvasW, y: Math.random() * canvasH, r: Math.random() * 3 + 1, d: Math.random() * numFlakes, speed: Math.random() * 1 + 0.5 }); }
+        function drawSnow() {
+            ctx.clearRect(0, 0, canvasW, canvasH); ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.beginPath();
+            for (let i = 0; i < numFlakes; i++) { const f = flakes[i]; ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true); }
+            ctx.fill(); moveSnow();
+        }
+        function moveSnow() {
+            for (let i = 0; i < numFlakes; i++) { const f = flakes[i]; f.y += f.speed; f.x += Math.sin(f.d) * 0.4; if (f.y > canvasH) { flakes[i] = { x: Math.random() * canvasW, y: 0, r: f.r, d: f.d, speed: f.speed }; } }
+        }
+        function updateAnimation() { drawSnow(); requestAnimationFrame(updateAnimation); }
+        updateAnimation();
     </script>
 </body>
 </html>
