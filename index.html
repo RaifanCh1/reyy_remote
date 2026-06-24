@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KzTeam REGEDIT Panel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #141421; /* Latar belakang gelap ungu dari gambar */
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 2.5rem 1rem;
+            overflow: hidden; /* Mencegah scrollbar muncul karena efek salju */
+            position: relative;
+        }
+
+        /* Canvas khusus efek salju */
+        #snowCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Supaya area di belakang tetap bisa diklik */
+            z-index: 1;
+        }
+
+        /* Memastikan konten utama berada di atas salju */
+        header, .panel-container, #status {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header Panel */
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Judul yang diperbarui sesuai gambar */
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        h1 .kz {
+            color: #bd00ff; /* Ungu terang untuk 'KzTeam' */
+            text-transform: none; /* Huruf normal */
+        }
+
+        h1 .regedit {
+            color: #ffffff; /* Putih terang untuk 'REGEDIT' */
+            text-transform: uppercase; /* Huruf besar semua */
+            font-weight: 900; /* Lebih tebal */
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #8c00c7; /* Ungu subtitle */
+            text-transform: lowercase; /* Huruf kecil semua */
+            letter-spacing: 1px;
+            font-style: italic;
+        }
+
+        /* Container Tombol List */
+        .panel-container {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Desain Tombol Kotak Panjang Ungu */
+        .trigger-btn {
+            width: 100%;
+            padding: 20px 24px;
+            background: #201a30; /* Latar tombol gelap ungu */
+            border: 2px solid rgba(189, 0, 255, 0.2); /* Border ungu tipis */
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efek lampu garis di sisi kiri tombol (Ungu) */
+        .trigger-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            background: #bd00ff; /* Ungu terang garis */
+            box-shadow: 0 0 15px #bd00ff;
+            transition: all 0.2s ease;
+        }
+
+        /* Icon panah di sebelah kanan tombol (Ungu) */
+        .trigger-btn::after {
+            content: '➔';
+            font-size: 1.2rem;
+            color: rgba(189, 0, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        /* Efek Hover / Sentuhan (Glow Ungu) */
+        .trigger-btn:hover {
+            transform: translateY(-2px) translateX(4px);
+            border-color: rgba(189, 0, 255, 0.7);
+            background: #25203a;
+            box-shadow: 0 6px 20px rgba(189, 0, 255, 0.2);
+        }
+
+        .trigger-btn:hover::after {
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        /* Efek Saat Ditekan */
+        .trigger-btn:active {
+            transform: scale(0.97) translateX(2px);
+            background: #1a1525;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Warna Khusus Tombol Utama (Ungu Lebih Gelap dari Gambar) */
+        .btn-main {
+            background: #460091; /* Ungu tua tombol 'Login' */
+            border-color: rgba(189, 0, 255, 0.4);
+        }
+        .btn-main::before {
+            background: #d459ff; /* Ungu sangat terang garis */
+            box-shadow: 0 0 15px #d459ff;
+        }
+        .btn-main:hover {
+            background: #5500b0;
+            border-color: rgba(189, 0, 255, 1);
+        }
+
+        /* Bar Status di Bagian Bawah (Serba Ungu) */
+        #status {
+            width: 100%;
+            max-width: 450px;
+            margin-top: 2.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 1.5px;
+            color: #8c00c7; /* Ungu status default */
+            transition: all 0.3s ease;
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(189, 0, 255, 0.05);
+            border: 1px solid rgba(189, 0, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="snowCanvas"></canvas>
+
+    <header>
+        <h1><span class="kz">KzTeam</span><span class="regedit">REGEDIT</span></h1>
+        <div class="subtitle">remote execution panel</div>
+    </header>
+
+    <div class="panel-container">
+        <button class="trigger-btn btn-main" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/apalah', 'LAUNCH APALAH')">Launch Apalah</button>
+        <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/1800x2880', 'RESO MIPAD 6')">Reso Mipad 6</button>
+        <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/1080x1920', 'RESO LANDSCAPE')">Reso Landscape</button>
+        <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/75faf3bc-a47e-4e30-a19d-2f7ba11968da/1080x2880', 'RESO ULTRAWIDE')">Reso Ultrawide</button>
+    </div>
+
+    <div id="status">System Ready</div>
+
+    <script>
+        // --- SCRIPT EFEK SALJU JATUH ---
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const numFlakes = 60; // Jumlah butiran salju di layar
+        const flakes = [];
+
+        for (let i = 0; i < numFlakes; i++) {
+            flakes.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                r: Math.random() * 3 + 1, // Ukuran butiran acak
+                d: Math.random() * numFlakes, // Kepadatan goyangan angin
+                speed: Math.random() * 1 + 0.5 // Kecepatan jatuh
+            });
+        }
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.65)'; // Warna salju putih transparan
+            ctx.beginPath();
+            for (let i = 0; i < numFlakes; i++) {
+                const f = flakes[i];
+                ctx.moveTo(f.x, f.y);
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+            }
+            ctx.fill();
+            moveSnow();
+        }
+
+        function moveSnow() {
+            for (let i = 0; i < numFlakes; i++) {
+                const f = flakes[i];
+                f.y += f.speed;
+                f.x += Math.sin(f.d) * 0.4; // Efek goyangan ditiup angin lembut
+
+                // Kalau salju sampai bawah layar, reset balikin ke atas
+                if (f.y > height) {
+                    flakes[i] = { x: Math.random() * width, y: 0, r: f.r, d: f.d, speed: f.speed };
+                }
+            }
+        }
+
+        function updateAnimation() {
+            drawSnow();
+            requestAnimationFrame(updateAnimation);
+        }
+        updateAnimation();
+
+
+        // --- SCRIPT TRIGGER MACRODROID ---
+        function kirimTrigger(url, namaFitur) {
+            const statusDiv = document.getElementById("status");
+            
+            statusDiv.innerText = `Executing: ${namaFitur}...`;
+            statusDiv.style.color = "#bd00ff";
+            statusDiv.style.backgroundColor = "rgba(189, 0, 255, 0.15)";
+            statusDiv.style.borderColor = "rgba(189, 0, 255, 0.3)";
+
+            fetch(url, { method: "GET", mode: "no-cors" })
+                .then(() => {
+                    statusDiv.innerText = `Success: ${namaFitur} Injected!`;
+                    statusDiv.style.color = "#ffffff";
+                    statusDiv.style.backgroundColor = "#460091";
+                    statusDiv.style.borderColor = "#bd00ff";
+                    
+                    setTimeout(() => {
+                        statusDiv.innerText = "System Ready";
+                        statusDiv.style.color = "#8c00c7";
+                        statusDiv.style.backgroundColor = "rgba(189, 0, 255, 0.05)";
+                        statusDiv.style.borderColor = "rgba(189, 0, 255, 0.1)";
+                    }, 2500);
+                })
+                .catch(error => {
+                    statusDiv.innerText = `Error: ${namaFitur} Failed`;
+                    statusDiv.style.color = "#ff3366";
+                    statusDiv.style.backgroundColor = "rgba(255, 51, 102, 0.1)";
+                    statusDiv.style.borderColor = "rgba(255, 51, 102, 0.2)";
+                    console.error("Error:", error);
+                });
+        }
+    </script>
+</body>
+</html>
