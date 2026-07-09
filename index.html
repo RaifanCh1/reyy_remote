@@ -208,8 +208,13 @@
 
     <div class="panel-container">
         <div id="ft-tools" class="tab-content active">
-            <button class="trigger-btn btn-main" onclick="kirimCmdRemote('regedit', 'ON/OFF PANEL')">On/Off Panel</button>
+            <!-- Diperbarui: Menggunakan cmd bkl_sensi dan teks BKL Sensi -->
+            <button class="trigger-btn btn-main" onclick="kirimCmdRemote('bkl_sensi', 'BKL SENSI')">BKL Sensi</button>
             <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/4441e721-5df1-4815-a9f4-509bc8d8b976/screenshot', 'SCREENSHOT')">Screenshot</button>
+            
+            <!-- Ditambahkan: Tombol baru Copilot dengan cmd copilot -->
+            <button class="trigger-btn" onclick="kirimCmdRemote('copilot', 'COPILOT')">Copilot</button>
+            
             <button class="trigger-btn" onclick="kirimCmdRemote('whatsapp', 'WHATSAPP')">Whatsapp</button>
             <button class="trigger-btn" onclick="kirimCmdRemote('ffmax', 'FREE FIRE MAX')">Free Fire Max</button>
             <button class="trigger-btn" onclick="kirimCmdRemote('ggmousepro', 'GG MOUSE PRO')">GG Mouse Pro</button>
