@@ -148,6 +148,17 @@
         }
         .btn-off:hover { background: #ff3366; color: #ffffff; box-shadow: 0 0 8px rgba(255, 51, 102, 0.4); }
 
+        /* Style Khusus Tombol Paste/Clipboard agar Selaras */
+        .btn-paste {
+            background: #1a232a; 
+            color: #00ff66; 
+            border: 1px solid rgba(0, 255, 102, 0.2);
+        }
+        .btn-paste:hover {
+            background: #22323d;
+            box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
+        }
+
         /* --- STYLING TOMBOL BIASA --- */
         .trigger-btn {
             width: 100%; padding: 20px 24px; background: #12181d;
@@ -158,6 +169,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative; overflow: hidden;
+            margin-top: 14px;
         }
 
         .trigger-btn::before {
@@ -302,6 +314,8 @@
                 <div class="feature-row">
                     <span class="feature-name">BKL Sensi</span>
                     <div class="action-group">
+                        <!-- Tombol Paste Terintegrasi -->
+                        <button class="btn-action btn-paste" onclick="eksekusiFitur('bkl_sensi_key', 'BKL SENSI KEY')">📋</button>
                         <button class="btn-action btn-on" onclick="eksekusiFitur('bkl_sensi', 'BKL SENSI [ON]')">ON</button>
                         <button class="btn-action btn-off" onclick="eksekusiFitur('bkl_sensi_off', 'BKL SENSI [OFF]')">OFF</button>
                     </div>
