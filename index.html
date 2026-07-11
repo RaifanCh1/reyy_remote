@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reyy P4NEL - Remote Execution</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #0b0f12; 
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 2.5rem 1rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #snowCanvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+        }
+
+        header, .tabs-container, .panel-container, #status {
+            position: relative; z-index: 10; width: 100%; max-width: 450px;
+        }
+
+        header {
+            text-align: center; margin-bottom: 2rem;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        h1 {
+            font-size: 2.4rem; font-weight: 800; letter-spacing: 2px;
+            margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;
+        }
+
+        h1 .kz {
+            color: #00ff66; text-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+        }
+
+        h1 .regedit { color: #ffffff; text-transform: uppercase; font-weight: 900; }
+        .subtitle { font-size: 0.9rem; color: #00aa44; font-style: italic; }
+
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+
+        .tab-btn {
+            flex: 1; padding: 12px; background: #12181d;
+            border: 2px solid rgba(0, 255, 102, 0.1); border-radius: 10px;
+            color: #888888; font-weight: 700; font-size: 0.85rem;
+            cursor: pointer; text-transform: uppercase; transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: #ffffff; background: #162a22; border-color: #00ff66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+
+        .tab-content { display: none; flex-direction: column; gap: 14px; width: 100%; }
+        .tab-content.active { display: flex !important; }
+
+        /* --- WADAH UTAMA / SATU KOTAK UNTUK SEMUA MENU --- */
+        .mod-menu-container {
+            width: 100%;
+            background: #12181d;
+            border: 2px solid rgba(0, 255, 102, 0.15);
+            border-radius: 14px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            padding: 10px 0;
+        }
+
+        .mod-menu-container::before {
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 5px;
+            background: #00ff66; box-shadow: 0 0 15px #00ff66;
+        }
+
+        .mod-menu-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #00ff66;
+            text-transform: uppercase;
+            padding: 5px 16px 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        /* --- BARIS UTK SETIAP FITUR DI DALAM KOTAK --- */
+        .feature-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .feature-row:last-child {
+            border-bottom: none;
+        }
+
+        .feature-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        /* Group tombol di sebelah kanan */
+        .action-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-action {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            border: none;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .btn-on {
+            background: #162a22; color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.3);
+        }
+        .btn-on:hover { background: #00ff66; color: #0b0f12; box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
+
+        .btn-off {
+            background: #2a1b24; color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.2);
+        }
+        .btn-off:hover { background: #ff3366; color: #ffffff; box-shadow: 0 0 8px rgba(255, 51, 102, 0.4); }
+
+        /* --- STYLING TOMBOL BIASA --- */
+        .trigger-btn {
+            width: 100%; padding: 20px 24px; background: #12181d;
+            border: 2px solid rgba(0, 255, 102, 0.15); border-radius: 14px;
+            color: #ffffff; font-size: 1.05rem; font-weight: 700;
+            text-transform: uppercase; text-align: left; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; overflow: hidden;
+        }
+
+        .trigger-btn::before {
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 5px;
+            background: #00ff66; box-shadow: 0 0 15px #00ff66;
+        }
+
+        .trigger-btn::after { content: '➔'; font-size: 1.2rem; color: rgba(0, 255, 102, 0.4); }
+
+        .trigger-btn:hover {
+            transform: translateY(-2px) translateX(4px);
+            border-color: rgba(0, 255, 102, 0.6); background: #172227;
+        }
+
+        .trigger-btn:active { transform: scale(0.97); background: #0e1317; }
+
+        .form-container {
+            background: #12181d; border: 2px solid rgba(0, 255, 102, 0.15);
+            border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+            width: 100%;
+        }
+
+        .form-group { margin-bottom: 0; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #00ff66; margin-bottom: 6px; text-transform: uppercase;}
+        .form-group input {
+            width: 100%; padding: 12px 16px; background: #1a232a;
+            border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 8px;
+            color: #ffffff; font-size: 1rem; outline: none;
+        }
+
+        .btn-submit {
+            width: 100%; padding: 14px; background: #00ff66; border: none; border-radius: 8px;
+            color: #0b0f12; font-size: 1rem; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 255, 102, 0.3);
+        }
+
+        .btn-save-preset {
+            width: 100%; padding: 12px; background: #162a22; border: 1px solid rgba(0, 255, 102, 0.4); border-radius: 8px;
+            color: #00ff66; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; transition: all 0.2s ease;
+        }
+        .btn-save-preset:hover { background: #1f3d30; }
+
+        .btn-reset-device {
+            width: 100%; padding: 12px; background: #2a1b24; border: 1px solid rgba(255, 51, 102, 0.3); border-radius: 8px;
+            color: #ff3366; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; transition: all 0.2s ease;
+        }
+        .btn-reset-device:hover { background: #3d1f2f; border-color: #ff3366; }
+
+        .preset-section {
+            margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px;
+        }
+        .preset-title {
+            font-size: 0.85rem; font-weight: 700; color: #888888; text-transform: uppercase; margin-bottom: 10px;
+        }
+        .preset-list {
+            display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;
+        }
+        .preset-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #1a232a; padding: 10px 14px; border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .preset-info {
+            cursor: pointer; flex: 1; text-align: left;
+        }
+        .preset-name { font-size: 0.9rem; font-weight: 700; color: #ffffff; }
+        .preset-details { font-size: 0.75rem; color: #888888; }
+        .btn-delete-preset {
+            background: none; border: none; color: #ff3366; font-weight: bold; cursor: pointer; padding: 0 5px; font-size: 1.1rem;
+        }
+
+        #status {
+            margin-top: 2.5rem; margin-bottom: 2rem; font-size: 0.9rem; font-weight: 600;
+            text-align: center; padding: 14px; border-radius: 12px;
+            background: rgba(0, 255, 102, 0.03); border: 1px solid rgba(0, 255, 102, 0.08); color: #00aa44;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); display: none; align-items: center;
+            justify-content: center; z-index: 100;
+        }
+
+        .modal-box {
+            background: #12181d; border: 2px solid #00ff66; border-radius: 16px;
+            padding: 25px; width: 90%; max-width: 380px; text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
+        }
+
+        .modal-box h3 { font-size: 1.3rem; color: #ffffff; margin-bottom: 10px; text-transform: uppercase;}
+        .modal-box p { font-size: 0.95rem; color: #aaaaaa; margin-bottom: 20px; }
+        
+        .timer-display {
+            font-size: 2.5rem; font-weight: 900; color: #ff3366;
+            margin-bottom: 20px; text-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+        }
+
+        .modal-buttons { display: flex; gap: 12px; }
+        
+        .modal-btn {
+            flex: 1; padding: 12px; border: none; border-radius: 8px;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
+        }
+        
+        .btn-confirm { background: #00ff66; color: #0b0f12; }
+        .btn-cancel { background: #2a1b24; color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.3); }
+    </style>
+</head>
+<body>
+
+    <canvas id="snowCanvas"></canvas>
+
+    <header>
+        <h1><span class="kz">Reyy</span><span class="regedit">P4NEL</span></h1>
+        <div class="subtitle">remote execution panel</div>
+    </header>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab(event, 'ft-tools')">FT Tools</button>
+        <button class="tab-btn" onclick="switchTab(event, 'reso-changer')">Resolution Changer</button>
+    </div>
+
+    <div class="panel-container">
+        <div id="ft-tools" class="tab-content active">
+            
+            <!-- SATU KOTAK LABEL / MOD MENU CONTAINER UTAMA -->
+            <div class="mod-menu-container">
+                <div class="mod-menu-title">Main Features List</div>
+
+                <!-- Baris 1: Free Fire Max -->
+                <div class="feature-row">
+                    <span class="feature-name">Free Fire Max</span>
+                    <div class="action-group">
+                        <button class="btn-action btn-on" onclick="eksekusiFitur('ffmax', 'FREE FIRE MAX [ON]')">ON</button>
+                        <button class="btn-action btn-off" onclick="eksekusiFitur('ffmax_off', 'FREE FIRE MAX [OFF]')">OFF</button>
+                    </div>
+                </div>
+
+                <!-- Baris 2: BKL Sensi -->
+                <div class="feature-row">
+                    <span class="feature-name">BKL Sensi</span>
+                    <div class="action-group">
+                        <button class="btn-action btn-on" onclick="eksekusiFitur('bkl_sensi', 'BKL SENSI [ON]')">ON</button>
+                        <button class="btn-action btn-off" onclick="eksekusiFitur('bkl_sensi_off', 'BKL SENSI [OFF]')">OFF</button>
+                    </div>
+                </div>
+
+                <!-- Baris 3: Copilot -->
+                <div class="feature-row">
+                    <span class="feature-name">Copilot</span>
+                    <div class="action-group">
+                        <button class="btn-action btn-on" onclick="eksekusiFitur('copilot', 'COPILOT [ON]')">ON</button>
+                        <button class="btn-action btn-off" onclick="eksekusiFitur('copilot_off', 'COPILOT [OFF]')">OFF</button>
+                    </div>
+                </div>
+
+                <!-- Baris 4: GG Mouse Pro -->
+                <div class="feature-row">
+                    <span class="feature-name">GG Mouse Pro</span>
+                    <div class="action-group">
+                        <button class="btn-action btn-on" onclick="eksekusiFitur('ggmousepro', 'GG MOUSE PRO [ON]')">ON</button>
+                        <button class="btn-action btn-off" onclick="eksekusiFitur('ggmousepro_off', 'GG MOUSE PRO [OFF]')">OFF</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOMBOL BIASA DI LUAR KOTAK MENU MOD -->
+            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/4441e721-5df1-4815-a9f4-509bc8d8b976/screenshot', 'SCREENSHOT')">Screenshot</button>
+            <button class="trigger-btn" onclick="kirimCmdRemote('whatsapp', 'WHATSAPP')">Whatsapp</button>
+        </div>
+
+        <div id="reso-changer" class="tab-content">
+            <div class="form-container">
+                <div class="form-group">
+                    <label>Horizontal (Lebar)</label>
+                    <input type="number" id="width" placeholder="Contoh: 1080">
+                </div>
+                <div class="form-group">
+                    <label>Vertical (Tinggi)</label>
+                    <input type="number" id="height" placeholder="Contoh: 2400">
+                </div>
+                <div class="form-group">
+                    <label>Density (DPI)</label>
+                    <input type="number" id="density" placeholder="Contoh: 440">
+                </div>
+                <button class="btn-submit" onclick="bukaFloatingWindow()">Terapkan Resolusi</button>
+                <button class="btn-save-preset" onclick="simpanPreset()">Simpan Ke Preset</button>
+                <button class="btn-reset-device" onclick="manualResetReso()">Reset Ke Normal Device</button>
+
+                <div class="preset-section">
+                    <div class="preset-title">Daftar Preset Tersimpan</div>
+                    <div id="presetList" class="preset-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="status">System Ready</div>
+
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Konfirmasi Resolusi</h3>
+            <p>Layar berubah! Tekan "Gunakan" jika pas. Jika salah input atau tidak ada respon selama 10 detik, sistem otomatis melakukan RESET.</p>
+            <div id="timerDisplay" class="timer-display">10</div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-confirm" onclick="konfirmasiReso()">Gunakan RESO</button>
+                <button class="modal-btn btn-cancel" onclick="batalReso()">Batal (Reset)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let countdown;
+        let timeLeft = 10;
+        
+        const remoteUrl = 'https://trigger.macrodroid.com/4441e721-5df1-4815-a9f4-509bc8d8b976/remote';
+        let audioCtx = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            tampilkanPreset();
+        });
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+        window.addEventListener('click', initAudio);
+        window.addEventListener('touchstart', initAudio);
+
+        function playBeep() {
+            try {
+                initAudio();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine'; 
+                oscillator.frequency.setValueAtTime(850, audioCtx.currentTime); 
+                
+                gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime); 
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08); 
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.08); 
+            } catch (error) {
+                console.log("Audio Error:", error);
+            }
+        }
+
+        function switchTab(e, tabId) {
+            playBeep(); 
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+            
+            e.currentTarget.classList.add('active');
+        }
+
+        function eksekusiFitur(namaCmd, namaFitur) {
+            const finalUrl = `${remoteUrl}?cmd=${namaCmd}`;
+            kirimTrigger(finalUrl, namaFitur);
+        }
+
+        function kirimCmdRemote(namaCmd, namaFitur) {
+            const finalUrl = `${remoteUrl}?cmd=${namaCmd}`;
+            kirimTrigger(finalUrl, namaFitur);
+        }
+
+        function bukaFloatingWindow() {
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            const d = document.getElementById('density').value;
+            const statusDiv = document.getElementById("status");
+
+            if (!w || !h || !d) {
+                statusDiv.innerText = "Error: Isi Semua Kolom!";
+                statusDiv.style.color = "#ff3366";
+                return;
+            }
+
+            const customUrl = `${remoteUrl}?cmd=ubah_reso&width=${w}&height=${h}&density=${d}`;
+            kirimTrigger(customUrl, `MENCOBA RESO (${w}x${h})`);
+
+            document.getElementById("modalOverlay").style.display = "flex";
+            timeLeft = 10;
+            document.getElementById("timerDisplay").innerText = timeLeft;
+
+            clearInterval(countdown);
+            countdown = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timerDisplay").innerText = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    autoEmergencyReset(); 
+                }
+            }, 1000);
+        }
+
+        function konfirmasiReso() {
+            playBeep();
+            clearInterval(countdown);
+            tutupFloatingWindow();
+            
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = "Success: Resolusi Dikunci!";
+            statusDiv.style.color = "#00ff66";
+            setTimeout(() => { resetStatus(); }, 2500);
+        }
+
+        function batalReso() {
+            playBeep();
+            clearInterval(countdown);
+            tutupFloatingWindow();
+            manualResetReso();
+        }
+
+        function autoEmergencyReset() {
+            tutupFloatingWindow();
+            
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = "TIMEOUT! Mengembalikan ke Resolusi Normal...";
+            statusDiv.style.color = "#ff3366";
+
+            const resetUrl = `${remoteUrl}?cmd=reset_reso`;
+            kirimTrigger(resetUrl, "EMERGENCY AUTO RESET");
+        }
+
+        function manualResetReso() {
+            const resetUrl = `${remoteUrl}?cmd=reset_reso`;
+            kirimTrigger(resetUrl, "RESET TO DEFAULT DEVICE");
+        }
+
+        document.getElementById("modalOverlay").addEventListener("click", function(e) {
+            if(e.target === this) { batalReso(); }
+        });
+
+        function tutupFloatingWindow() {
+            document.getElementById("modalOverlay").style.display = "none";
+        }
+
+        function simpanPreset() {
+            playBeep();
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            const d = document.getElementById('density').value;
+            const statusDiv = document.getElementById("status");
+
+            if (!w || !h || !d) {
+                statusDiv.innerText = "Error: Isi data sebelum save!";
+                statusDiv.style.color = "#ff3366";
+                setTimeout(() => { resetStatus(); }, 2000);
+                return;
+            }
+
+            const namaPreset = prompt("Masukkan Nama Preset:");
+            if (!namaPreset) return;
+
+            let presets = JSON.parse(localStorage.getItem("reyy_presets")) || [];
+            presets.push({ name: namaPreset, width: w, height: h, density: d });
+            localStorage.setItem("reyy_presets", JSON.stringify(presets));
+
+            statusDiv.innerText = "Success: Preset Disimpan!";
+            statusDiv.style.color = "#00ff66";
+            setTimeout(() => { resetStatus(); }, 2000);
+
+            tampilkanPreset();
+        }
+
+        function tampilkanPreset() {
+            const presetList = document.getElementById("presetList");
+            if (!presetList) return;
+            
+            presetList.innerHTML = "";
+            let presets = JSON.parse(localStorage.getItem("reyy_presets")) || [];
+
+            if (presets.length === 0) {
+                presetList.innerHTML = `<div style="font-size:0.8rem; color:#555555; text-align:center; padding:10px;">Belum ada preset disimpan</div>`;
+                return;
+            }
+
+            presets.forEach((p, index) => {
+                const item = document.createElement("div");
+                item.className = "preset-item";
+                item.innerHTML = `
+                    <div class="preset-info" onclick="loadPreset('${p.width}', '${p.height}', '${p.density}')">
+                        <div class="preset-name">${p.name}</div>
+                        <div class="preset-details">${p.width} x ${p.height} | DPI: ${p.density}</div>
+                    </div>
+                    <button class="btn-delete-preset" onclick="hapusPreset(event, ${index})">×</button>
+                `;
+                presetList.appendChild(item);
+            });
+        }
+
+        function loadPreset(w, h, d) {
+            playBeep();
+            document.getElementById('width').value = w;
+            document.getElementById('height').value = h;
+            document.getElementById('density').value = d;
+            
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = `Loaded: Preset masuk ke form!`;
+            statusDiv.style.color = "#00ff66";
+            setTimeout(() => { resetStatus(); }, 2000);
+        }
+
+        function hapusPreset(e, index) {
+            playBeep();
+            e.stopPropagation();
+            if (confirm("Hapus preset ini?")) {
+                let presets = JSON.parse(localStorage.getItem("reyy_presets")) || [];
+                presets.splice(index, 1);
+                localStorage.setItem("reyy_presets", JSON.stringify(presets));
+                tampilkanPreset();
+            }
+        }
+
+        function kirimTrigger(url, namaFitur) {
+            playBeep(); 
+            
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = `Executing: ${namaFitur}...`;
+            statusDiv.style.color = "#00ff66";
+
+            const imgBypass = new Image();
+            const separator = url.includes('?') ? '&' : '?';
+            imgBypass.src = url + separator + "t=" + new Date().getTime();
+
+            setTimeout(() => {
+                statusDiv.innerText = `Success: ${namaFitur} Injected!`;
+                setTimeout(() => { resetStatus(); }, 2500);
+            }, 600);
+        }
+
+        function resetStatus() {
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = "System Ready";
+            statusDiv.style.color = "#00aa44";
+        }
+
+        // --- SNOW ANIMATION ---
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        let canvasW = canvas.width = window.innerWidth;
+        let canvasH = canvas.height = window.innerHeight;
+        const numFlakes = 60; const flakes = [];
+        for (let i = 0; i < numFlakes; i++) { flakes.push({ x: Math.random() * canvasW, y: Math.random() * canvasH, r: Math.random() * 3 + 1, d: Math.random() * numFlakes, speed: Math.random() * 1 + 0.5 }); }
+        function drawSnow() {
+            ctx.clearRect(0, 0, canvasW, canvasH); ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.beginPath();
+            for (let i = 0; i < numFlakes; i++) { const f = flakes[i]; ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true); }
+            ctx.fill(); moveSnow();
+        }
+        function moveSnow() {
+            for (let i = 0; i < numFlakes; i++) { const f = flakes[i]; f.y += f.speed; f.x += Math.sin(f.d) * 0.4; if (f.y > canvasH) { flakes[i] = { x: Math.random() * canvasW, y: 0, r: f.r, d: f.d, speed: f.speed }; } }
+        }
+        function updateAnimation() { drawSnow(); requestAnimationFrame(updateAnimation); }
+        updateAnimation();
+        
+        window.addEventListener('resize', function() {
+            canvasW = canvas.width = window.innerWidth;
+            canvasH = canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
