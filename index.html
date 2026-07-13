@@ -107,6 +107,27 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
         }
 
+        /* --- STYLING SUB-MENU CONTAINER --- */
+        .submenu-container {
+            background: rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 6px 16px 10px 16px;
+        }
+
+        .submenu-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .submenu-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #888888;
+            letter-spacing: 0.5px;
+        }
+
         .feature-row:last-child {
             border-bottom: none;
         }
@@ -119,7 +140,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Group tombol di sebelah kanan */
+        /* Group tombol di sebelah kanan/kiri */
         .action-group {
             display: flex;
             gap: 6px;
@@ -311,13 +332,26 @@
                 </div>
 
                 <!-- Baris 2: BKL Sensi -->
-                <div class="feature-row">
+                <div class="feature-row" style="border-bottom: none;">
                     <span class="feature-name">BKL Sensi</span>
                     <div class="action-group">
                         <!-- Tombol Paste Terintegrasi -->
                         <button class="btn-action btn-paste" onclick="eksekusiFitur('bkl_sensi_key', 'BKL SENSI KEY')">📋</button>
                         <button class="btn-action btn-on" onclick="eksekusiFitur('bkl_sensi', 'BKL SENSI [ON]')">ON</button>
                         <button class="btn-action btn-off" onclick="eksekusiFitur('bkl_sensi_off', 'BKL SENSI [OFF]')">OFF</button>
+                    </div>
+                </div>
+
+                <!-- SUB-MENU BKL SENSI (UI SHOW HIDE) - POSISI SUDAH DITUKAR -->
+                <div id="ui-submenu" class="submenu-container">
+                    <div class="submenu-row">
+                        <!-- Tombol aksi (SHOW/HIDE) di sisi KIRI -->
+                        <div class="action-group">
+                            <button class="btn-action btn-on" style="min-width:60px;" onclick="eksekusiFitur('bkl_sensi_show', 'UI SHOW')">SHOW</button>
+                            <button class="btn-action btn-off" style="min-width:60px;" onclick="eksekusiFitur('bkl_sensi_hide', 'UI HIDE')">HIDE</button>
+                        </div>
+                        <!-- Teks Label di sisi KANAN -->
+                        <span class="submenu-name">UI Visibility</span>
                     </div>
                 </div>
 
