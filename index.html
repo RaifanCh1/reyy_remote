@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reyy P4NEL - Remote Execution</title>
     <style>
+        :root {
+            --bg-color: #0b0f12;
+            --card-bg: #12181d;
+            --input-bg: #1a232a;
+            --primary-color: #00ff66;
+            --primary-dim: rgba(0, 255, 102, 0.15);
+            --danger-color: #ff3366;
+            --danger-dim: rgba(255, 51, 102, 0.2);
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border-color: rgba(0, 255, 102, 0.2);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,8 +26,8 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: #0b0f12; 
-            color: #ffffff;
+            background: var(--bg-color);
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -28,69 +41,240 @@
 
         #snowCanvas {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            pointer-events: none; 
+            z-index: 1;
         }
 
-        header, .tabs-container, .panel-container, #status {
-            position: relative; z-index: 10; width: 100%; max-width: 450px;
+        /* ICON PROFIL POJOK KANAN ATAS */
+        .header-profile-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 50;
+        }
+
+        .profile-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+        }
+
+        .profile-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+        }
+
+        .profile-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* DROPDOWN MENU PROFIL */
+        .profile-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            width: 240px;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-dim);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .profile-dropdown.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-avatar-large {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #1a2721;
+            border: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        .profile-name {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .profile-username {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--danger-dim);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger-color);
+            color: var(--text-main);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+        }
+
+        /* TAMPILAN LOGIN */
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 5rem;
+        }
+
+        /* TAMPILAN UTAMA */
+        #main-app {
+            display: none; /* Disembunyikan sampai login berhasil */
+            position: relative; 
+            z-index: 10; 
+            width: 100%; 
+            max-width: 450px;
         }
 
         header {
-            text-align: center; margin-bottom: 2rem;
-            display: flex; flex-direction: column; align-items: center;
+            text-align: center; 
+            margin-bottom: 2rem;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
         }
 
         h1 {
-            font-size: 2.4rem; font-weight: 800; letter-spacing: 2px;
-            margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;
+            font-size: 2.4rem; 
+            font-weight: 800; 
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
         }
 
         h1 .kz {
-            color: #00ff66; text-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+            color: var(--primary-color); 
+            text-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
         }
 
-        h1 .regedit { color: #ffffff; text-transform: uppercase; font-weight: 900; }
-        .subtitle { font-size: 0.9rem; color: #00aa44; font-style: italic; }
+        h1 .regedit { 
+            color: var(--text-main); 
+            text-transform: uppercase; 
+            font-weight: 900; 
+        }
 
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+        .subtitle { 
+            font-size: 0.9rem; 
+            color: #00aa44; 
+            font-style: italic; 
+        }
+
+        .tabs-container { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 1.5rem; 
+        }
 
         .tab-btn {
-            flex: 1; padding: 12px; background: #12181d;
-            border: 2px solid rgba(0, 255, 102, 0.1); border-radius: 10px;
-            color: #888888; font-weight: 700; font-size: 0.85rem;
-            cursor: pointer; text-transform: uppercase; transition: all 0.2s ease;
+            flex: 1; 
+            padding: 12px; 
+            background: var(--card-bg);
+            border: 2px solid var(--border-color); 
+            border-radius: 10px;
+            color: var(--text-muted); 
+            font-weight: 700; 
+            font-size: 0.85rem;
+            cursor: pointer; 
+            text-transform: uppercase; 
+            transition: all 0.2s ease;
         }
 
         .tab-btn.active {
-            color: #ffffff; background: #162a22; border-color: #00ff66;
+            color: var(--text-main); 
+            background: #162a22; 
+            border-color: var(--primary-color);
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
         }
 
-        .tab-content { display: none; flex-direction: column; gap: 14px; width: 100%; }
-        .tab-content.active { display: flex !important; }
+        .tab-content { 
+            display: none; 
+            flex-direction: column; 
+            gap: 14px; 
+            width: 100%; 
+        }
 
-        /* --- WADAH UTAMA / SATU KOTAK UNTUK SEMUA MENU --- */
-        .mod-menu-container {
+        .tab-content.active { 
+            display: flex !important; 
+        }
+
+        .mod-menu-container, .form-container {
             width: 100%;
-            background: #12181d;
-            border: 2px solid rgba(0, 255, 102, 0.15);
+            background: var(--card-bg);
+            border: 2px solid var(--primary-dim);
             border-radius: 14px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
+            padding: 20px;
+        }
+
+        .mod-menu-container {
             padding: 10px 0;
         }
 
         .mod-menu-container::before {
-            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 5px;
-            background: #00ff66; box-shadow: 0 0 15px #00ff66;
+            content: ''; 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            height: 100%; 
+            width: 5px;
+            background: var(--primary-color); 
+            box-shadow: 0 0 15px var(--primary-color);
         }
 
         .mod-menu-title {
             font-size: 0.8rem;
             font-weight: 800;
-            color: #00ff66;
+            color: var(--primary-color);
             text-transform: uppercase;
             padding: 5px 16px 12px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -98,7 +282,6 @@
             margin-bottom: 5px;
         }
 
-        /* --- BARIS UTK SETIAP FITUR DI DALAM KOTAK --- */
         .feature-row {
             display: flex;
             justify-content: space-between;
@@ -107,11 +290,14 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
         }
 
-        /* --- STYLING SUB-MENU CONTAINER --- */
+        .feature-row:last-child {
+            border-bottom: none;
+        }
+
         .submenu-container {
             background: rgba(0, 0, 0, 0.15);
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            padding: 6px 16px 10px 16px;
+            padding: 8px 16px;
         }
 
         .submenu-row {
@@ -120,27 +306,16 @@
             align-items: center;
         }
 
-        .submenu-name {
-            font-size: 0.85rem;
+        .submenu-name, .feature-name {
+            font-size: 0.9rem;
             font-weight: 700;
             text-transform: uppercase;
-            color: #888888;
             letter-spacing: 0.5px;
         }
 
-        .feature-row:last-child {
-            border-bottom: none;
-        }
+        .submenu-name { color: var(--text-muted); }
+        .feature-name { color: var(--text-main); }
 
-        .feature-name {
-            font-size: 0.95rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #ffffff;
-            letter-spacing: 0.5px;
-        }
-
-        /* Group tombol di sebelah kanan/kiri */
         .action-group {
             display: flex;
             gap: 6px;
@@ -160,253 +335,409 @@
         }
 
         .btn-on {
-            background: #162a22; color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.3);
+            background: #162a22; 
+            color: var(--primary-color); 
+            border: 1px solid var(--border-color);
         }
-        .btn-on:hover { background: #00ff66; color: #0b0f12; box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
+        .btn-on:hover { 
+            background: var(--primary-color); 
+            color: var(--bg-color); 
+            box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); 
+        }
 
         .btn-off {
-            background: #2a1b24; color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.2);
+            background: #2a1b24; 
+            color: var(--danger-color); 
+            border: 1px solid var(--danger-dim);
         }
-        .btn-off:hover { background: #ff3366; color: #ffffff; box-shadow: 0 0 8px rgba(255, 51, 102, 0.4); }
+        .btn-off:hover { 
+            background: var(--danger-color); 
+            color: var(--text-main); 
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.4); 
+        }
 
-        /* Style Khusus Tombol Paste/Clipboard agar Selaras */
         .btn-paste {
-            background: #1a232a; 
-            color: #00ff66; 
-            border: 1px solid rgba(0, 255, 102, 0.2);
+            background: var(--input-bg); 
+            color: var(--primary-color); 
+            border: 1px solid var(--border-color);
         }
         .btn-paste:hover {
             background: #22323d;
             box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
         }
 
-        /* --- STYLING TOMBOL BIASA --- */
         .trigger-btn {
-            width: 100%; padding: 20px 24px; background: #12181d;
-            border: 2px solid rgba(0, 255, 102, 0.15); border-radius: 14px;
-            color: #ffffff; font-size: 1.05rem; font-weight: 700;
-            text-transform: uppercase; text-align: left; cursor: pointer;
-            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; 
+            padding: 18px 24px; 
+            background: var(--card-bg);
+            border: 2px solid var(--primary-dim); 
+            border-radius: 14px;
+            color: var(--text-main); 
+            font-size: 1rem; 
+            font-weight: 700;
+            text-transform: uppercase; 
+            text-align: left; 
+            cursor: pointer;
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative; overflow: hidden;
-            margin-top: 14px;
+            transition: all 0.2s ease;
+            position: relative; 
+            overflow: hidden;
+            margin-top: 10px;
         }
 
         .trigger-btn::before {
-            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 5px;
-            background: #00ff66; box-shadow: 0 0 15px #00ff66;
+            content: ''; 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            height: 100%; 
+            width: 5px;
+            background: var(--primary-color); 
+            box-shadow: 0 0 15px var(--primary-color);
         }
 
-        .trigger-btn::after { content: '➔'; font-size: 1.2rem; color: rgba(0, 255, 102, 0.4); }
+        .trigger-btn::after { 
+            content: '➔'; 
+            font-size: 1.2rem; 
+            color: rgba(0, 255, 102, 0.4); 
+        }
 
         .trigger-btn:hover {
-            transform: translateY(-2px) translateX(4px);
-            border-color: rgba(0, 255, 102, 0.6); background: #172227;
+            transform: translateY(-2px);
+            border-color: rgba(0, 255, 102, 0.6); 
+            background: #172227;
         }
 
-        .trigger-btn:active { transform: scale(0.97); background: #0e1317; }
-
-        .form-container {
-            background: #12181d; border: 2px solid rgba(0, 255, 102, 0.15);
-            border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
-            width: 100%;
+        .form-group {
+            margin-bottom: 12px;
         }
 
-        .form-group { margin-bottom: 0; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #00ff66; margin-bottom: 6px; text-transform: uppercase;}
+        .form-group label { 
+            display: block; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: var(--primary-color); 
+            margin-bottom: 6px; 
+            text-transform: uppercase;
+        }
+
         .form-group input {
-            width: 100%; padding: 12px 16px; background: #1a232a;
-            border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 8px;
-            color: #ffffff; font-size: 1rem; outline: none;
+            width: 100%; 
+            padding: 12px 16px; 
+            background: var(--input-bg);
+            border: 1px solid var(--border-color); 
+            border-radius: 8px;
+            color: var(--text-main); 
+            font-size: 1rem; 
+            outline: none;
         }
 
         .btn-submit {
-            width: 100%; padding: 14px; background: #00ff66; border: none; border-radius: 8px;
-            color: #0b0f12; font-size: 1rem; font-weight: 800; cursor: pointer;
-            text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 255, 102, 0.3);
+            width: 100%; 
+            padding: 14px; 
+            background: var(--primary-color); 
+            border: none; 
+            border-radius: 8px;
+            color: var(--bg-color); 
+            font-size: 1rem; 
+            font-weight: 800; 
+            cursor: pointer;
+            text-transform: uppercase; 
+            box-shadow: 0 4px 15px rgba(0, 255, 102, 0.3);
+            margin-top: 5px;
+        }
+
+        .btn-save-preset, .btn-reset-device {
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 8px;
+            font-size: 0.9rem; 
+            font-weight: 700; 
+            cursor: pointer;
+            text-transform: uppercase; 
+            transition: all 0.2s ease;
+            margin-top: 8px;
         }
 
         .btn-save-preset {
-            width: 100%; padding: 12px; background: #162a22; border: 1px solid rgba(0, 255, 102, 0.4); border-radius: 8px;
-            color: #00ff66; font-size: 0.9rem; font-weight: 700; cursor: pointer;
-            text-transform: uppercase; transition: all 0.2s ease;
+            background: #162a22; 
+            border: 1px solid rgba(0, 255, 102, 0.4);
+            color: var(--primary-color);
         }
-        .btn-save-preset:hover { background: #1f3d30; }
 
         .btn-reset-device {
-            width: 100%; padding: 12px; background: #2a1b24; border: 1px solid rgba(255, 51, 102, 0.3); border-radius: 8px;
-            color: #ff3366; font-size: 0.9rem; font-weight: 700; cursor: pointer;
-            text-transform: uppercase; transition: all 0.2s ease;
+            background: #2a1b24; 
+            border: 1px solid var(--danger-dim);
+            color: var(--danger-color);
         }
-        .btn-reset-device:hover { background: #3d1f2f; border-color: #ff3366; }
 
         .preset-section {
-            margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px;
+            margin-top: 10px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.1); 
+            padding-top: 15px;
         }
+
         .preset-title {
-            font-size: 0.85rem; font-weight: 700; color: #888888; text-transform: uppercase; margin-bottom: 10px;
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            margin-bottom: 10px;
         }
+
         .preset-list {
-            display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            max-height: 160px; 
+            overflow-y: auto;
         }
+
         .preset-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #1a232a; padding: 10px 14px; border-radius: 8px;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: var(--input-bg); 
+            padding: 10px 14px; 
+            border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .preset-info {
-            cursor: pointer; flex: 1; text-align: left;
-        }
-        .preset-name { font-size: 0.9rem; font-weight: 700; color: #ffffff; }
-        .preset-details { font-size: 0.75rem; color: #888888; }
+
+        .preset-info { cursor: pointer; flex: 1; text-align: left; }
+        .preset-name { font-size: 0.9rem; font-weight: 700; color: var(--text-main); }
+        .preset-details { font-size: 0.75rem; color: var(--text-muted); }
+
         .btn-delete-preset {
-            background: none; border: none; color: #ff3366; font-weight: bold; cursor: pointer; padding: 0 5px; font-size: 1.1rem;
+            background: none; 
+            border: none; 
+            color: var(--danger-color); 
+            font-weight: bold; 
+            cursor: pointer; 
+            padding: 0 5px; 
+            font-size: 1.1rem;
         }
 
         #status {
-            margin-top: 2.5rem; margin-bottom: 2rem; font-size: 0.9rem; font-weight: 600;
-            text-align: center; padding: 14px; border-radius: 12px;
-            background: rgba(0, 255, 102, 0.03); border: 1px solid rgba(0, 255, 102, 0.08); color: #00aa44;
+            margin-top: 2rem; 
+            margin-bottom: 2rem; 
+            font-size: 0.9rem; 
+            font-weight: 600;
+            text-align: center; 
+            padding: 14px; 
+            border-radius: 12px;
+            background: rgba(0, 255, 102, 0.03); 
+            border: 1px solid rgba(0, 255, 102, 0.08); 
+            color: #00aa44;
         }
 
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); display: none; align-items: center;
-            justify-content: center; z-index: 100;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8); 
+            display: none; 
+            align-items: center;
+            justify-content: center; 
+            z-index: 100;
         }
 
         .modal-box {
-            background: #12181d; border: 2px solid #00ff66; border-radius: 16px;
-            padding: 25px; width: 90%; max-width: 380px; text-align: center;
+            background: var(--card-bg); 
+            border: 2px solid var(--primary-color); 
+            border-radius: 16px;
+            padding: 25px; 
+            width: 90%; 
+            max-width: 380px; 
+            text-align: center;
             box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
         }
 
-        .modal-box h3 { font-size: 1.3rem; color: #ffffff; margin-bottom: 10px; text-transform: uppercase;}
-        .modal-box p { font-size: 0.95rem; color: #aaaaaa; margin-bottom: 20px; }
-        
+        .modal-box h3 { font-size: 1.3rem; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; }
+        .modal-box p { font-size: 0.9rem; color: #aaaaaa; margin-bottom: 20px; line-height: 1.4; }
+
         .timer-display {
-            font-size: 2.5rem; font-weight: 900; color: #ff3366;
-            margin-bottom: 20px; text-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+            font-size: 2.5rem; 
+            font-weight: 900; 
+            color: var(--danger-color);
+            margin-bottom: 20px; 
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
         }
 
         .modal-buttons { display: flex; gap: 12px; }
-        
+
         .modal-btn {
-            flex: 1; padding: 12px; border: none; border-radius: 8px;
-            font-size: 0.95rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px;
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            text-transform: uppercase;
         }
-        
-        .btn-confirm { background: #00ff66; color: #0b0f12; }
-        .btn-cancel { background: #2a1b24; color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.3); }
+
+        .btn-confirm { background: var(--primary-color); color: var(--bg-color); }
+        .btn-cancel { background: #2a1b24; color: var(--danger-color); border: 1px solid var(--danger-dim); }
     </style>
 </head>
 <body>
 
     <canvas id="snowCanvas"></canvas>
 
-    <header>
-        <h1><span class="kz">Reyy</span><span class="regedit">P4NEL</span></h1>
-        <div class="subtitle">remote execution panel</div>
-    </header>
-
-    <div class="tabs-container">
-        <button class="tab-btn active" onclick="switchTab(event, 'ft-tools')">FT Tools</button>
-        <button class="tab-btn" onclick="switchTab(event, 'reso-changer')">Resolution Changer</button>
+    <!-- SECTION 1: HALAMAN LOGIN -->
+    <div id="login-container" class="login-wrapper">
+        <header>
+            <h1><span class="kz">Reyy</span><span class="regedit">P4NEL</span></h1>
+            <div class="subtitle">Authentication Required</div>
+        </header>
+        <div class="form-container">
+            <div class="form-group">
+                <label for="passkey">Passkey / Password</label>
+                <input type="password" id="passkey" placeholder="Masukkan password..." onkeypress="handleKeypress(event)">
+            </div>
+            <button class="btn-submit" onclick="verifikasiLogin()">Masuk</button>
+            <div id="login-error" style="color: var(--danger-color); font-size: 0.85rem; text-align: center; margin-top: 12px; display: none; font-weight: bold;">
+                Password Salah!
+            </div>
+        </div>
     </div>
 
-    <div class="panel-container">
-        <div id="ft-tools" class="tab-content active">
-            
-            <!-- SATU KOTAK LABEL / MOD MENU CONTAINER UTAMA -->
-            <div class="mod-menu-container">
-                <div class="mod-menu-title">Main Features List</div>
+    <!-- SECTION 2: PANEL UTAMA -->
+    <div id="main-app">
 
-                <!-- Baris 1: Free Fire Max -->
-                <div class="feature-row">
-                    <span class="feature-name">Free Fire Max</span>
-                    <div class="action-group">
-                        <button class="btn-action btn-on" onclick="eksekusiFitur('ffmax', 'FREE FIRE MAX [ON]')">ON</button>
-                        <button class="btn-action btn-off" onclick="eksekusiFitur('ffmax_off', 'FREE FIRE MAX [OFF]')">OFF</button>
-                    </div>
+        <!-- ICON PROFIL AKUN GOOGLE POJOK KANAN ATAS -->
+        <div class="header-profile-container">
+            <div class="profile-btn" onclick="toggleProfileMenu(event)">
+                <!-- Google User Icon SVG -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="#00ff66"/>
+                </svg>
+            </div>
+
+            <!-- DROPDOWN PROFIL -->
+            <div id="profileDropdown" class="profile-dropdown">
+                <div class="profile-avatar-large">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="#00ff66"/>
+                    </svg>
                 </div>
-
-                <!-- Baris 2: BKL Sensi -->
-                <div class="feature-row" style="border-bottom: none;">
-                    <span class="feature-name">BKL Sensi</span>
-                    <div class="action-group">
-                        <!-- Tombol Paste Terintegrasi -->
-                        <button class="btn-action btn-paste" onclick="eksekusiFitur('bkl_sensi_key', 'BKL SENSI KEY')">📋</button>
-                        <button class="btn-action btn-on" onclick="eksekusiFitur('bkl_sensi', 'BKL SENSI [ON]')">ON</button>
-                        <button class="btn-action btn-off" onclick="eksekusiFitur('bkl_sensi_off', 'BKL SENSI [OFF]')">OFF</button>
-                    </div>
+                <div>
+                    <div class="profile-name">Reyy Official</div>
+                    <div class="profile-username">reyy.panel.admin@gmail.com</div>
                 </div>
+                <button class="btn-logout" onclick="logoutPanel()">Log Out</button>
+            </div>
+        </div>
 
-                <!-- SUB-MENU BKL SENSI (UI SHOW HIDE) - POSISI SUDAH DITUKAR -->
-                <div id="ui-submenu" class="submenu-container">
-                    <div class="submenu-row">
-                        <!-- Tombol aksi (SHOW/HIDE) di sisi KIRI -->
+        <header>
+            <h1><span class="kz">Reyy</span><span class="regedit">P4NEL</span></h1>
+            <div class="subtitle">remote execution panel</div>
+        </header>
+
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab(event, 'ft-tools')">FT Tools</button>
+            <button class="tab-btn" onclick="switchTab(event, 'reso-changer')">Resolution Changer</button>
+        </div>
+
+        <div class="panel-container">
+            <!-- TAB 1: FT TOOLS -->
+            <div id="ft-tools" class="tab-content active">
+                <div class="mod-menu-container">
+                    <div class="mod-menu-title">Main Features List</div>
+
+                    <div class="feature-row">
+                        <span class="feature-name">Free Fire Max</span>
                         <div class="action-group">
-                            <button class="btn-action btn-on" style="min-width:60px;" onclick="eksekusiFitur('bkl_sensi_show', 'UI SHOW')">SHOW</button>
-                            <button class="btn-action btn-off" style="min-width:60px;" onclick="eksekusiFitur('bkl_sensi_hide', 'UI HIDE')">HIDE</button>
+                            <button class="btn-action btn-on" onclick="eksekusiFitur('ffmax', 'FREE FIRE MAX [ON]')">ON</button>
+                            <button class="btn-action btn-off" onclick="eksekusiFitur('ffmax_off', 'FREE FIRE MAX [OFF]')">OFF</button>
                         </div>
-                        <!-- Teks Label di sisi KANAN -->
-                        <span class="submenu-name">UI Visibility</span>
+                    </div>
+
+                    <div class="feature-row">
+                        <span class="feature-name">BKL Sensi</span>
+                        <div class="action-group">
+                            <button class="btn-action btn-paste" onclick="eksekusiFitur('bkl_sensi_key', 'BKL SENSI KEY')">📋</button>
+                            <button class="btn-action btn-on" onclick="eksekusiFitur('bkl_sensi', 'BKL SENSI [ON]')">ON</button>
+                            <button class="btn-action btn-off" onclick="eksekusiFitur('bkl_sensi_off', 'BKL SENSI [OFF]')">OFF</button>
+                        </div>
+                    </div>
+
+                    <div id="ui-submenu" class="submenu-container">
+                        <div class="submenu-row">
+                            <div class="action-group">
+                                <button class="btn-action btn-on" style="min-width:60px;" onclick="eksekusiFitur('bkl_sensi_show', 'UI SHOW')">SHOW</button>
+                                <button class="btn-action btn-off" style="min-width:60px;" onclick="eksekusiFitur('bkl_sensi_hide', 'UI HIDE')">HIDE</button>
+                            </div>
+                            <span class="submenu-name">UI Visibility</span>
+                        </div>
+                    </div>
+
+                    <div class="feature-row">
+                        <span class="feature-name">Copilot</span>
+                        <div class="action-group">
+                            <button class="btn-action btn-on" onclick="eksekusiFitur('copilot', 'COPILOT [ON]')">ON</button>
+                            <button class="btn-action btn-off" onclick="eksekusiFitur('copilot_off', 'COPILOT [OFF]')">OFF</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-row">
+                        <span class="feature-name">GG Mouse Pro</span>
+                        <div class="action-group">
+                            <button class="btn-action btn-on" onclick="eksekusiFitur('ggmousepro', 'GG MOUSE PRO [ON]')">ON</button>
+                            <button class="btn-action btn-off" onclick="eksekusiFitur('ggmousepro_off', 'GG MOUSE PRO [OFF]')">OFF</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-row">
+                        <span class="feature-name">Accessibility</span>
+                        <div class="action-group">
+                            <button class="btn-action btn-on" onclick="eksekusiFitur('accessibility_on', 'ACCESSIBILITY [ON]')">ON</button>
+                            <button class="btn-action btn-off" onclick="eksekusiFitur('accessibility_off', 'ACCESSIBILITY [OFF]')">OFF</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Baris 3: Copilot -->
-                <div class="feature-row">
-                    <span class="feature-name">Copilot</span>
-                    <div class="action-group">
-                        <button class="btn-action btn-on" onclick="eksekusiFitur('copilot', 'COPILOT [ON]')">ON</button>
-                        <button class="btn-action btn-off" onclick="eksekusiFitur('copilot_off', 'COPILOT [OFF]')">OFF</button>
-                    </div>
-                </div>
+                <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/0cd25382-7bc3-4dad-8f9f-f7447492f47a/screenshot', 'SCREENSHOT')">Screenshot</button>
+                <button class="trigger-btn" onclick="kirimCmdRemote('whatsapp', 'WHATSAPP')">Whatsapp</button>
+            </div>
 
-                <!-- Baris 4: GG Mouse Pro -->
-                <div class="feature-row">
-                    <span class="feature-name">GG Mouse Pro</span>
-                    <div class="action-group">
-                        <button class="btn-action btn-on" onclick="eksekusiFitur('ggmousepro', 'GG MOUSE PRO [ON]')">ON</button>
-                        <button class="btn-action btn-off" onclick="eksekusiFitur('ggmousepro_off', 'GG MOUSE PRO [OFF]')">OFF</button>
+            <!-- TAB 2: RESOLUTION CHANGER -->
+            <div id="reso-changer" class="tab-content">
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="width">Horizontal (Lebar)</label>
+                        <input type="number" id="width" placeholder="Contoh: 1080">
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Vertical (Tinggi)</label>
+                        <input type="number" id="height" placeholder="Contoh: 2400">
+                    </div>
+                    <div class="form-group">
+                        <label for="density">Density (DPI)</label>
+                        <input type="number" id="density" placeholder="Contoh: 440">
+                    </div>
+                    
+                    <button class="btn-submit" onclick="bukaFloatingWindow()">Terapkan Resolusi</button>
+                    <button class="btn-save-preset" onclick="simpanPreset()">Simpan Ke Preset</button>
+                    <button class="btn-reset-device" onclick="manualResetReso()">Reset Ke Normal Device</button>
+
+                    <div class="preset-section">
+                        <div class="preset-title">Daftar Preset Tersimpan</div>
+                        <div id="presetList" class="preset-list"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- TOMBOL BIASA DI LUAR KOTAK MENU MOD -->
-            <button class="trigger-btn" onclick="kirimTrigger('https://trigger.macrodroid.com/0cd25382-7bc3-4dad-8f9f-f7447492f47a/screenshot', 'SCREENSHOT')">Screenshot</button>
-            <button class="trigger-btn" onclick="kirimCmdRemote('whatsapp', 'WHATSAPP')">Whatsapp</button>
         </div>
 
-        <div id="reso-changer" class="tab-content">
-            <div class="form-container">
-                <div class="form-group">
-                    <label>Horizontal (Lebar)</label>
-                    <input type="number" id="width" placeholder="Contoh: 1080">
-                </div>
-                <div class="form-group">
-                    <label>Vertical (Tinggi)</label>
-                    <input type="number" id="height" placeholder="Contoh: 2400">
-                </div>
-                <div class="form-group">
-                    <label>Density (DPI)</label>
-                    <input type="number" id="density" placeholder="Contoh: 440">
-                </div>
-                <button class="btn-submit" onclick="bukaFloatingWindow()">Terapkan Resolusi</button>
-                <button class="btn-save-preset" onclick="simpanPreset()">Simpan Ke Preset</button>
-                <button class="btn-reset-device" onclick="manualResetReso()">Reset Ke Normal Device</button>
-
-                <div class="preset-section">
-                    <div class="preset-title">Daftar Preset Tersimpan</div>
-                    <div id="presetList" class="preset-list"></div>
-                </div>
-            </div>
-        </div>
+        <div id="status">System Ready</div>
     </div>
 
-    <div id="status">System Ready</div>
-
+    <!-- MODAL CONFIRMATION -->
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal-box">
             <h3>Konfirmasi Resolusi</h3>
@@ -420,16 +751,71 @@
     </div>
 
     <script>
+        // PASSWORD PANEL
+        const PASSWORD_PANEL = "123456";
+
         let countdown;
         let timeLeft = 10;
-        
         const remoteUrl = 'https://trigger.macrodroid.com/0cd25382-7bc3-4dad-8f9f-f7447492f47a/remote';
         let audioCtx = null;
 
+        // Cek Status Login Otomatis
         document.addEventListener("DOMContentLoaded", () => {
-            tampilkanPreset();
+            const isVerified = localStorage.getItem("reyy_panel_logged_in");
+            
+            if (isVerified === "true") {
+                document.getElementById("login-container").style.display = "none";
+                document.getElementById("main-app").style.display = "block";
+                tampilkanPreset();
+            }
         });
 
+        // FUNGSI VERIFIKASI LOGIN
+        function verifikasiLogin() {
+            playBeep();
+            const inputPass = document.getElementById("passkey").value;
+            const errorDiv = document.getElementById("login-error");
+
+            if (inputPass === PASSWORD_PANEL) {
+                localStorage.setItem("reyy_panel_logged_in", "true");
+                document.getElementById("login-container").style.display = "none";
+                document.getElementById("main-app").style.display = "block";
+                tampilkanPreset();
+            } else {
+                errorDiv.style.display = "block";
+            }
+        }
+
+        // FUNGSI LOGOUT
+        function logoutPanel() {
+            playBeep();
+            localStorage.removeItem("reyy_panel_logged_in");
+            location.reload();
+        }
+
+        // TOGGLE DROPDOWN PROFIL
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            playBeep();
+            const dropdown = document.getElementById("profileDropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        // Tutup Dropdown Jika Klik Di Luar Menu
+        window.addEventListener("click", () => {
+            const dropdown = document.getElementById("profileDropdown");
+            if (dropdown && dropdown.classList.contains("show")) {
+                dropdown.classList.remove("show");
+            }
+        });
+
+        function handleKeypress(event) {
+            if (event.key === "Enter") {
+                verifikasiLogin();
+            }
+        }
+
+        // Inisialisasi Audio
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -438,48 +824,45 @@
                 audioCtx.resume();
             }
         }
-        window.addEventListener('click', initAudio);
-        window.addEventListener('touchstart', initAudio);
+        window.addEventListener('click', initAudio, { once: true });
+        window.addEventListener('touchstart', initAudio, { once: true });
 
         function playBeep() {
             try {
                 initAudio();
+                if (!audioCtx) return;
+
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
 
-                oscillator.type = 'sine'; 
-                oscillator.frequency.setValueAtTime(850, audioCtx.currentTime); 
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(850, audioCtx.currentTime);
                 
-                gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime); 
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08); 
+                gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
 
                 oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.08); 
+                oscillator.stop(audioCtx.currentTime + 0.08);
             } catch (error) {
                 console.log("Audio Error:", error);
             }
         }
 
         function switchTab(e, tabId) {
-            playBeep(); 
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(content => content.classList.remove('active'));
-
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
+            playBeep();
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
             const targetTab = document.getElementById(tabId);
             if (targetTab) targetTab.classList.add('active');
-            
             e.currentTarget.classList.add('active');
         }
 
         function eksekusiFitur(namaCmd, namaFitur) {
-            const finalUrl = `${remoteUrl}?cmd=${namaCmd}`;
-            kirimTrigger(finalUrl, namaFitur);
+            kirimCmdRemote(namaCmd, namaFitur);
         }
 
         function kirimCmdRemote(namaCmd, namaFitur) {
@@ -495,7 +878,7 @@
 
             if (!w || !h || !d) {
                 statusDiv.innerText = "Error: Isi Semua Kolom!";
-                statusDiv.style.color = "#ff3366";
+                statusDiv.style.color = "var(--danger-color)";
                 return;
             }
 
@@ -513,7 +896,7 @@
                 
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
-                    autoEmergencyReset(); 
+                    autoEmergencyReset();
                 }
             }, 1000);
         }
@@ -525,8 +908,8 @@
             
             const statusDiv = document.getElementById("status");
             statusDiv.innerText = "Success: Resolusi Dikunci!";
-            statusDiv.style.color = "#00ff66";
-            setTimeout(() => { resetStatus(); }, 2500);
+            statusDiv.style.color = "var(--primary-color)";
+            setTimeout(resetStatus, 2500);
         }
 
         function batalReso() {
@@ -541,7 +924,7 @@
             
             const statusDiv = document.getElementById("status");
             statusDiv.innerText = "TIMEOUT! Mengembalikan ke Resolusi Normal...";
-            statusDiv.style.color = "#ff3366";
+            statusDiv.style.color = "var(--danger-color)";
 
             const resetUrl = `${remoteUrl}?cmd=reset_reso`;
             kirimTrigger(resetUrl, "EMERGENCY AUTO RESET");
@@ -553,7 +936,7 @@
         }
 
         document.getElementById("modalOverlay").addEventListener("click", function(e) {
-            if(e.target === this) { batalReso(); }
+            if (e.target === this) { batalReso(); }
         });
 
         function tutupFloatingWindow() {
@@ -569,8 +952,8 @@
 
             if (!w || !h || !d) {
                 statusDiv.innerText = "Error: Isi data sebelum save!";
-                statusDiv.style.color = "#ff3366";
-                setTimeout(() => { resetStatus(); }, 2000);
+                statusDiv.style.color = "var(--danger-color)";
+                setTimeout(resetStatus, 2000);
                 return;
             }
 
@@ -582,8 +965,8 @@
             localStorage.setItem("reyy_presets", JSON.stringify(presets));
 
             statusDiv.innerText = "Success: Preset Disimpan!";
-            statusDiv.style.color = "#00ff66";
-            setTimeout(() => { resetStatus(); }, 2000);
+            statusDiv.style.color = "var(--primary-color)";
+            setTimeout(resetStatus, 2000);
 
             tampilkanPreset();
         }
@@ -596,7 +979,7 @@
             let presets = JSON.parse(localStorage.getItem("reyy_presets")) || [];
 
             if (presets.length === 0) {
-                presetList.innerHTML = `<div style="font-size:0.8rem; color:#555555; text-align:center; padding:10px;">Belum ada preset disimpan</div>`;
+                presetList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:10px;">Belum ada preset disimpan</div>`;
                 return;
             }
 
@@ -622,8 +1005,8 @@
             
             const statusDiv = document.getElementById("status");
             statusDiv.innerText = `Loaded: Preset masuk ke form!`;
-            statusDiv.style.color = "#00ff66";
-            setTimeout(() => { resetStatus(); }, 2000);
+            statusDiv.style.color = "var(--primary-color)";
+            setTimeout(resetStatus, 2000);
         }
 
         function hapusPreset(e, index) {
@@ -638,19 +1021,19 @@
         }
 
         function kirimTrigger(url, namaFitur) {
-            playBeep(); 
+            playBeep();
             
             const statusDiv = document.getElementById("status");
             statusDiv.innerText = `Executing: ${namaFitur}...`;
-            statusDiv.style.color = "#00ff66";
+            statusDiv.style.color = "var(--primary-color)";
 
             const imgBypass = new Image();
             const separator = url.includes('?') ? '&' : '?';
-            imgBypass.src = url + separator + "t=" + new Date().getTime();
+            imgBypass.src = url + separator + "t=" + Date.now();
 
             setTimeout(() => {
                 statusDiv.innerText = `Success: ${namaFitur} Injected!`;
-                setTimeout(() => { resetStatus(); }, 2500);
+                setTimeout(resetStatus, 2500);
             }, 600);
         }
 
@@ -660,25 +1043,55 @@
             statusDiv.style.color = "#00aa44";
         }
 
-        // --- SNOW ANIMATION ---
+        // --- ANIMASI SALJU ---
         const canvas = document.getElementById('snowCanvas');
         const ctx = canvas.getContext('2d');
         let canvasW = canvas.width = window.innerWidth;
         let canvasH = canvas.height = window.innerHeight;
-        const numFlakes = 60; const flakes = [];
-        for (let i = 0; i < numFlakes; i++) { flakes.push({ x: Math.random() * canvasW, y: Math.random() * canvasH, r: Math.random() * 3 + 1, d: Math.random() * numFlakes, speed: Math.random() * 1 + 0.5 }); }
+        const numFlakes = 60; 
+        const flakes = [];
+
+        for (let i = 0; i < numFlakes; i++) { 
+            flakes.push({ 
+                x: Math.random() * canvasW, 
+                y: Math.random() * canvasH, 
+                r: Math.random() * 3 + 1, 
+                d: Math.random() * numFlakes, 
+                speed: Math.random() * 1 + 0.5 
+            }); 
+        }
+
         function drawSnow() {
-            ctx.clearRect(0, 0, canvasW, canvasH); ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.beginPath();
-            for (let i = 0; i < numFlakes; i++) { const f = flakes[i]; ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true); }
-            ctx.fill(); moveSnow();
+            ctx.clearRect(0, 0, canvasW, canvasH); 
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
+            ctx.beginPath();
+            for (let i = 0; i < numFlakes; i++) { 
+                const f = flakes[i]; 
+                ctx.moveTo(f.x, f.y); 
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true); 
+            }
+            ctx.fill(); 
+            moveSnow();
         }
+
         function moveSnow() {
-            for (let i = 0; i < numFlakes; i++) { const f = flakes[i]; f.y += f.speed; f.x += Math.sin(f.d) * 0.4; if (f.y > canvasH) { flakes[i] = { x: Math.random() * canvasW, y: 0, r: f.r, d: f.d, speed: f.speed }; } }
+            for (let i = 0; i < numFlakes; i++) { 
+                const f = flakes[i]; 
+                f.y += f.speed; 
+                f.x += Math.sin(f.d) * 0.4; 
+                if (f.y > canvasH) { 
+                    flakes[i] = { x: Math.random() * canvasW, y: 0, r: f.r, d: f.d, speed: f.speed }; 
+                } 
+            }
         }
-        function updateAnimation() { drawSnow(); requestAnimationFrame(updateAnimation); }
+
+        function updateAnimation() { 
+            drawSnow(); 
+            requestAnimationFrame(updateAnimation); 
+        }
         updateAnimation();
         
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', () => {
             canvasW = canvas.width = window.innerWidth;
             canvasH = canvas.height = window.innerHeight;
         });
